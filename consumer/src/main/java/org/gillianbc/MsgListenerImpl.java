@@ -3,10 +3,12 @@ package org.gillianbc;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 
-public class MsgListener implements MessageListener {
+public class MsgListenerImpl implements MessageListener {
 	private int textMsgCount = 0;
+	private int objMsgCount = 0;
 	
 	public void onMessage(Message message)
     {
@@ -15,6 +17,8 @@ public class MsgListener implements MessageListener {
             if (message instanceof TextMessage)
             {
                 processTextMessage(message);
+            } else if (message instanceof ObjectMessage){
+            	processObjectMessage(message);
             }
             else
             {
@@ -34,10 +38,16 @@ public class MsgListener implements MessageListener {
 
 	private void processTextMessage(Message message) throws JMSException {
 		TextMessage txtMessage = (TextMessage)message;
-		System.out.println("Test Message received: " + txtMessage.getText());
+		
 		textMsgCount++;
+		
+		System.out.println("Test Message received: " + textMsgCount + " " + txtMessage.getText());
 	}
-
+	private void processObjectMessage(Message message) throws JMSException {
+		ObjectMessage objMessage = (ObjectMessage)message;
+		System.out.println("Test Object Message received: ");
+		objMsgCount++;
+	}
 	public int getMsgCount() {
 		return textMsgCount;
 	}

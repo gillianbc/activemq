@@ -14,6 +14,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.*;
@@ -27,10 +28,9 @@ public class AppTest
 	public static String brokerURL = "tcp://localhost:61616";
 	private Connection connection;
     private Session session;
-    private MessageConsumer consumer;
-    
-    private MsgListener mlistener;
-    
+    private Consumer consumer;
+    private Producer producer;
+    private MsgListenerImpl mlistener;
     private final static String QUEUE_NAME = "TestGBC";
     
     
@@ -39,65 +39,60 @@ public class AppTest
     	System.out.println("BEFORE");
     	// setup the connection to ActiveMQ
         factory  = new ActiveMQConnectionFactory(brokerURL);
-        mlistener = new MsgListener();
+        
+        mlistener = new MsgListenerImpl();
         try {
-			connection = factory.createConnection();
+        	producer = new Producer(factory, QUEUE_NAME);
+			consumer = new Consumer(mlistener);
+        	/*connection = factory.createConnection();
 			connection.start();
 	        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 	        
 	        Destination destination = session.createQueue(QUEUE_NAME);
             consumer = session.createConsumer(destination);
-            consumer.setMessageListener(mlistener);
+            consumer.setMessageListener(mlistener);*/
 		} catch (JMSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         
     }
-    @Test
-    public void testApp()
-    {
-        assertTrue( true );
-    }
     
+    /*
+     * Tests that 3 text messages are created and consumed
+     */
     @Test
     public void testTextMsgs(){
-    	Producer producer;
 		try {
-			producer = new Producer(factory, QUEUE_NAME);
-			producer.run(3, "Hello");
+			
+			producer.run(3, "Hello vvv");
 	        producer.close();
+	        consumer.run(QUEUE_NAME);
 	        System.out.println("Count is " + mlistener.getMsgCount());
             assertEquals(3, mlistener.getMsgCount());
 		} catch (JMSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        
     }
     
-    private class MListener implements MessageListener {
-
-    	public void onMessage(Message message)
-        {
-            try
-            {
-                if (message instanceof TextMessage)
-                {
-                    TextMessage txtMessage = (TextMessage)message;
-                    System.out.println("Test Message received: " + txtMessage.getText());
-                }
-                else
-                {
-                    System.out.println("Invalid message received.");
-                }
-            }
-            catch (JMSException e)
-            {
-                System.out.println("Caught:" + e);
-                e.printStackTrace();
-            }
-        }
+    /*
+     * Tests that 3 text messages are created and consumed
+     */
+    @Test
+    public void testObjectMsgs() throws JMSException{
     	
+    	producer.run(3, "Hello");
+        assertEquals(3, mlistener.getMsgCount());
+    }
+    
+    @After
+    public void tearDown(){
+    	try {
+			producer.close();
+		} catch (JMSException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 }
