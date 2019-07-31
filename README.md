@@ -44,10 +44,10 @@ To consume some sample messages, run the consumer:
 
 # Next Steps TODO 
 
-- Produce messages in different queues
+- Produce messages in different queues - DONE
 - Consume messages using a filter
 - Have multiple producers, consumers
 - Subscriptions (is that topics?) with multiple subscribers
-- Junit test cases
+- Junit test cases - STARTED
 - Can I check what's in a queue without consuming it?
-
+- Use MessageConsumer so that I can wait for the messages - having problems with the messages not appearing until after my assertions
